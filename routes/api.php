@@ -15,3 +15,5 @@ use Illuminate\Http\Request;
 
 Route::post('/airport', 'AirportController@create');
 Route::post('/service', 'ServiceController@create');
+Route::post('/service/{serviceId}/opening-hours', 'OpeningHourController@create');
+Route::get('/service/search', 'ServiceController@search');

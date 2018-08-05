@@ -8,6 +8,7 @@ use App\{
     Airport
 };
 use Exception;
+use Carbon\Carbon;
 
 class ServiceController extends Controller
 {
@@ -28,7 +29,25 @@ class ServiceController extends Controller
             'name' => $request->get('name')
         ]);
 
+        $openingHour = $service->openingHours()->where('day_of_week', 1)->first();
+        dd($openingHour);
+
         return $service;
+
+    }
+
+    public function search(Request $request)
+    {
+        $from = $request->get('from');
+        $services = Service::whereHas('openingHours', function($q) use ($from) {
+
+            $datetime = Carbon::createFromFormat('Y-m-d\TH:i:s+', $from);
+            $dayOfWeek = $datetime->format('l');
+            $q->where('day_of_week', $dayOfWeek);
+            $time = $datetime->format('h:m:i');
+            $q->where('opening_time', '<', $time);
+            $q->where('closing_time', '>', $time);
+        });
 
     }
 }
