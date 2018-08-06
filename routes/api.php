@@ -13,7 +13,8 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::post('/airport', 'AirportController@create');
-Route::post('/service', 'ServiceController@create');
-Route::post('/service/{serviceId}/opening-hours', 'OpeningHourController@create');
-Route::get('/service/search', 'ServiceController@search');
+Route::post('/airports', 'AirportController@create');
+Route::get('/airports', 'AirportController@search');
+Route::post('/services', 'ServiceController@create');
+Route::post('/services/{serviceId}/opening-hours', 'OpeningHourController@create');
+Route::get('/services/search', 'ServiceController@search');

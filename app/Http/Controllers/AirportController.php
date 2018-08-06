@@ -22,4 +22,11 @@ class AirportController extends Controller
             'code' => $request->get('code')
         ]);
     }
+
+    public function search(Request $request)
+    {
+        $airports = Airport::get();
+        return $airports;
+    }
+
 }
