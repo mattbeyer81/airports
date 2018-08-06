@@ -14,4 +14,9 @@ class Service extends Model
         return $this->hasMany(OpeningHour::class);
     }
 
+    public function airport()
+    {
+        return $this->belongsTo(Airport::class);
+    }
+
 }

@@ -9,6 +9,7 @@ use App\{
 };
 use Exception;
 use Carbon\Carbon;
+use Log;
 
 class ServiceController extends Controller
 {
@@ -22,7 +23,7 @@ class ServiceController extends Controller
     {
         $airport = Airport::where('code', $request->get('airport_code'))->first();
         if (!$airport) {
-            throw Exception('No airport with airport_code does not exists');
+            throw new Exception('No airport with airport_code does not exists');
         }
 
         $service = $airport->services()->firstOrCreate([
@@ -30,7 +31,6 @@ class ServiceController extends Controller
         ]);
 
         $openingHour = $service->openingHours()->where('day_of_week', 1)->first();
-        dd($openingHour);
 
         return $service;
 
@@ -38,16 +38,32 @@ class ServiceController extends Controller
 
     public function search(Request $request)
     {
-        $from = $request->get('from');
-        $services = Service::whereHas('openingHours', function($q) use ($from) {
+        try {
+            $from = $request->get('from');
+            $serviceQ = Service::query()->with('airport');
+            if ($from){
+                $services = $serviceQ->whereHas('openingHours', function($q) use ($from) {
+                    $datetime = Carbon::createFromFormat('Y-m-d\TH:i:s+', $from);
+                    $dayOfWeek = $datetime->format('l');
+                    $q->where('day_of_week', $dayOfWeek);
+                    $time = $datetime->format('h:m:i');
+                    $q->where('opening_time', '<', $time);
+                    $q->where('closing_time', '>', $time);
+                });
+            } else {
+                $services = $serviceQ->get();
+            }
+            return response()->json([
+                'status' => 'success',
+                'results' => $services
+            ], 200);
+        } catch (Exception $e){
+            dd($e);
+            return response()->json([
+                'status' => 'error'
+            ], 500);
+        }
 
-            $datetime = Carbon::createFromFormat('Y-m-d\TH:i:s+', $from);
-            $dayOfWeek = $datetime->format('l');
-            $q->where('day_of_week', $dayOfWeek);
-            $time = $datetime->format('h:m:i');
-            $q->where('opening_time', '<', $time);
-            $q->where('closing_time', '>', $time);
-        });
 
     }
 }
