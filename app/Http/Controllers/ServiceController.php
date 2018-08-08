@@ -30,9 +30,52 @@ class ServiceController extends Controller
             'name' => $request->get('name')
         ]);
 
-        $openingHour = $service->openingHours()->where('day_of_week', 1)->first();
+        for ($i = 0; $i < 7; $i++) {
+            $service->openingHours()->where('day_of_week', $i)->firstOrCreate(['day_of_week' => $i]);
+        }
 
         return $service;
+
+    }
+
+    public function update(Request $request)
+    {
+        $airport = Airport::where('code', $request->get('airport_code'))->first();
+        if (!$airport) {
+            throw new Exception('No airport with airport_code does not exists');
+        }
+
+        $service = $airport->services()->firstOrCreate([
+            'name' => $request->get('name')
+        ]);
+
+        $openingHour = $service->openingHours()->where('day_of_week', 'Tuesday')->firstOrCreate([
+            'day_of_week' => 'Monday'
+        ]);
+
+        return $service;
+
+    }
+
+    private function getFromTimeStr($str)
+    {
+        $datetime = Carbon::createFromFormat('Y-m-d\TH:i:s+', $str);
+        return $datetime->format('H:m:i');
+    }
+
+    public function getServices(Request $request)
+    {
+        try {
+            $services = Service::with(['openingHours', 'airport'])->get();
+            return response()->json([
+                'status' => 'success',
+                'results' => $services
+            ], 200);
+        } catch (Exception $e){
+            return response()->json([
+                'status' => 'error'
+            ], 500);
+        }
 
     }
 
@@ -40,30 +83,55 @@ class ServiceController extends Controller
     {
         try {
             $from = $request->get('from');
-            $serviceQ = Service::query()->with('airport');
-            if ($from){
-                $services = $serviceQ->whereHas('openingHours', function($q) use ($from) {
-                    $datetime = Carbon::createFromFormat('Y-m-d\TH:i:s+', $from);
-                    $dayOfWeek = $datetime->format('l');
-                    $q->where('day_of_week', $dayOfWeek);
-                    $time = $datetime->format('h:m:i');
-                    $q->where('opening_time', '<', $time);
-                    $q->where('closing_time', '>', $time);
-                });
-            } else {
-                $services = $serviceQ->get();
-            }
+            $to = $request->get('to');
+            $dayOfWeek = $request->get('day_of_week');
+            $serviceQ = Service::query()
+                ->with('airport')
+                ->with('openingHours');
+
+            $fromTimeStr = $this->getFromTimeStr($from);
+            $toTimeStr = $this->getFromTimeStr($to);
+            $airport = Airport::find($request->get('airport_id'));
+
+            $serviceQ  = $airport->services()
+                ->with('airport')
+                ->with('openingHours');
+
+            $serviceQ->whereHas('openingHours', function($q) use ($fromTimeStr, $toTimeStr, $dayOfWeek) {
+                    $q->where('day_of_week', 0);
+                    $q->whereNotNull('opening_time');
+                    $q->whereNotNull('closing_time');
+                    $q->where(function($q) use ($fromTimeStr, $toTimeStr) {
+                        $q->where(function($q) use ($fromTimeStr, $toTimeStr) {
+                            $q->where('opening_time', '>', $fromTimeStr);
+                            $q->where('opening_time', '<', $toTimeStr);
+                        });
+                        $q->orWhere(function($q) use ($fromTimeStr, $toTimeStr) {
+                            $q->where('closing_time', '>', $fromTimeStr);
+                            $q->where('closing_time', '<', $toTimeStr);
+                        });
+                        $q->orWhere(function($q) use ($fromTimeStr, $toTimeStr) {
+                            $q->where('opening_time', '<', $fromTimeStr);
+                            $q->where('closing_time', '>', $toTimeStr);
+                        });
+                        $q->orWhere(function($q) use ($fromTimeStr, $toTimeStr) {
+                            $q->where('opening_time', '>', $fromTimeStr);
+                            $q->where('closing_time', '<', $toTimeStr);
+                        });
+                    });
+            });
+
+            $services = $serviceQ->get();
+
             return response()->json([
                 'status' => 'success',
                 'results' => $services
             ], 200);
         } catch (Exception $e){
-            dd($e);
             return response()->json([
                 'status' => 'error'
             ], 500);
         }
-
 
     }
 }

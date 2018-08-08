@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\OpeningHour;
+use Carbon\Carbon;
 
 class OpeningHourController extends Controller
 {
@@ -16,24 +17,25 @@ class OpeningHourController extends Controller
     */
     public function create(Request $request, $serviceId)
     {
-        $openingHours = $request->all();
 
-        foreach ($openingHours as $openingHour) {
-            $openingHourObj = OpeningHour
-            ::where('service_id', $serviceId)
-            ->where('day_of_week', $openingHour['day_of_week'])->first();
-            if ($openingHourObj) {
-                $openingHourObj->opening_time = $openingHour['opening_time'];
-                $openingHourObj->closing_time = $openingHour['closing_time'];
+        try {
+            $openingHours = $request->all();
+
+            foreach ($openingHours as $openingHour) {
+                $openingHourObj = OpeningHour::find($openingHour['id']);
+                $openingHourObj->opening_time = isset($openingHour['opening_time']) ? Carbon::createFromFormat('Y-m-d\TH:i:s+', $openingHour['opening_time']) : null;
+                $openingHourObj->closing_time = isset($openingHour['closing_time']) ? Carbon::createFromFormat('Y-m-d\TH:i:s+', $openingHour['closing_time']) : null;
                 $openingHourObj->save();
-            } else {
-                OpeningHour::create([
-                    'service_id' => $serviceId,
-                    'day_of_week' => $openingHour['day_of_week'],
-                    'opening_time' => $openingHour['opening_time'],
-                    'closing_time' => $openingHour['closing_time'],
-                ]);
+
             }
+            return response()->json([
+                'status' => 'success'
+            ], 200);
+        } catch (Exception $e){
+            return response()->json([
+                'status' => 'error'
+            ], 500);
         }
+
     }
 }
