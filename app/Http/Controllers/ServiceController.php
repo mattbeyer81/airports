@@ -11,6 +11,7 @@ use Exception;
 use Carbon\Carbon;
 use Log;
 use GuzzleHttp\Client as GuzzleClient;
+use Response;
 
 class ServiceController extends Controller
 {
@@ -20,7 +21,7 @@ class ServiceController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return Response
      */
-    public function create(Request $request)
+    public function create(Request $request) : Response
     {
 
         try {
@@ -62,7 +63,7 @@ class ServiceController extends Controller
      * @return array
      */
 
-    private function getCompanyHouseDetailsByCompanyNumber($companyNumber)
+    private function getCompanyHouseDetailsByCompanyNumber($companyNumber) : array
     {
         try {
             $guzzle = new GuzzleClient;
@@ -90,7 +91,7 @@ class ServiceController extends Controller
      * @return Response
      */
 
-    public function update(Request $request)
+    public function update(Request $request) : Response
     {
         try {
             $airport = Airport::where('code', $request->get('airport_code'))->first();
@@ -127,7 +128,7 @@ class ServiceController extends Controller
      * @param  string   $str
      * @return string
      */
-    private function getFromTimeStr($str)
+    private function getFromTimeStr($str) : string
     {
         $datetime = Carbon::createFromFormat('Y-m-d\TH:i:s+', $str);
         return $datetime->format('H:m:i');
@@ -161,7 +162,7 @@ class ServiceController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return Response
      */
-    public function search(Request $request)
+    public function search(Request $request) : Response
     {
         try {
             $from = $request->get('from');

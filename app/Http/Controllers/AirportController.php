@@ -16,7 +16,7 @@ class AirportController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return Airport
      */
-    public function create(Request $request)
+    public function create(Request $request) : Response
     {
         try {
             Airport::create([
@@ -40,7 +40,7 @@ class AirportController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return Airport
      */
-    public function delete(Request $request, $airportId)
+    public function delete(Request $request, $airportId) : Response
     {
         try {
             Airport::find($airportId)->delete();
@@ -62,10 +62,19 @@ class AirportController extends Controller
      * @return array
      */
 
-    public function getList(Request $request)
+    public function getList(Request $request) : Response
     {
-        $airports = Airport::get();
-        return $airports;
+        try {
+            $airports = Airport::get();
+            return response()->json([
+                'status' => 'success',
+                'results' => $airports,
+            ], 200);
+        } catch (Exception $e){
+            return response()->json([
+                'status' => 'error'
+            ], 500);
+        }
     }
 
     /**
@@ -75,7 +84,7 @@ class AirportController extends Controller
      * @return Response
      */
 
-    public function update(Request $request)
+    public function update(Request $request) : Response
     {
         try {
             $data = $request->all();
