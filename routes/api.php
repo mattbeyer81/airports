@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 */
 
 Route::post('/airports', 'AirportController@create');
-Route::get('/airports', 'AirportController@search');
+Route::get('/airports', 'AirportController@getList');
 Route::put('/airports', 'AirportController@update');
 Route::delete('/airports/{airportId}', 'AirportController@delete');
 Route::post('/services', 'ServiceController@create');

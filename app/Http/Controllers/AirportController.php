@@ -55,11 +55,25 @@ class AirportController extends Controller
 
     }
 
-    public function search(Request $request)
+    /**
+     * Get list of all airports.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+
+    public function getList(Request $request)
     {
         $airports = Airport::get();
         return $airports;
     }
+
+    /**
+     * Update airport.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return Response
+     */
 
     public function update(Request $request)
     {
