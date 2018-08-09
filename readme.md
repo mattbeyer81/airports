@@ -49,3 +49,4 @@ Airports with same name and code can be created.
 Page does not scroll up to view create/edit forms
 Opening hours dates appear blank by default when creating/editing
 Clearing search does not set search form as pristine.
+Companies House API Key is visible in public repo.
