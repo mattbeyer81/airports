@@ -6,8 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class Service extends Model
 {
-    protected $fillable = ['name', 'airport_id'];
+    protected $fillable = ['name', 'airport_id', 'data'];
 
+    protected $casts = [
+        'data' => 'array'
+    ];
 
     public function openingHours()
     {

@@ -10,6 +10,7 @@ use App\{
 use Exception;
 use Carbon\Carbon;
 use Log;
+use GuzzleHttp\Client as GuzzleClient;
 
 class ServiceController extends Controller
 {
@@ -23,19 +24,44 @@ class ServiceController extends Controller
     {
         $airport = Airport::where('code', $request->get('airport_code'))->first();
         if (!$airport) {
-            throw new Exception('No airport with airport_code does not exists');
+            throw new Exception('Airport with code provided does not exists');
+        }
+
+        if ($request->get('company_number')) {
+            $companyHouseDetails = $this->getCompanyHouseDetailsByCompanyNumber($request->get('company_number'));
         }
 
         $service = $airport->services()->firstOrCreate([
-            'name' => $request->get('name')
+            'name' => $request->get('name'),
+            'data' => $companyHouseDetails
         ]);
 
         for ($i = 0; $i < 7; $i++) {
             $service->openingHours()->where('day_of_week', $i)->firstOrCreate(['day_of_week' => $i]);
         }
 
+
+
+
         return $service;
 
+    }
+
+    private function getCompanyHouseDetailsByCompanyNumber($companyNumber)
+    {
+        $guzzle = new GuzzleClient;
+        $response = $guzzle->request('GET', "https://api.companieshouse.gov.uk/company/{$companyNumber}", [
+            'auth' => [
+                '2xLi0Ep2OKQDTecZlXium-RUONljnnBwzgSYfsEd',
+                ''
+            ]
+        ]);
+        $responseJson = json_decode($response->getBody()->getContents());
+
+        return [
+            'company_name' => $responseJson->company_name,
+            'company_number' => $companyNumber
+        ];
     }
 
     public function update(Request $request)
@@ -52,6 +78,11 @@ class ServiceController extends Controller
         $openingHour = $service->openingHours()->where('day_of_week', 'Tuesday')->firstOrCreate([
             'day_of_week' => 'Monday'
         ]);
+
+        if ($request->get('company_number')) {
+            $companyHouseDetails = $this->getCompanyHouseDetailsByCompanyNumber($request->get('company_number'));
+        }
+
 
         return $service;
 
