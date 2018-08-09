@@ -11,7 +11,7 @@ use Exception;
 use Carbon\Carbon;
 use Log;
 use GuzzleHttp\Client as GuzzleClient;
-use Response;
+use Illuminate\Http\JsonResponse;
 
 class ServiceController extends Controller
 {
@@ -19,9 +19,9 @@ class ServiceController extends Controller
      * Create a new airport service.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return Response
+     * @return JsonResponse
      */
-    public function create(Request $request) : Response
+    public function create(Request $request) : JsonResponse
     {
 
         try {
@@ -30,12 +30,16 @@ class ServiceController extends Controller
                 throw new Exception('Airport with code provided does not exists');
             }
 
+
             if ($request->get('company_number')) {
                 $companyHouseDetails = $this->getCompanyHouseDetailsByCompanyNumber($request->get('company_number'));
+            } else {
+                $companyHouseDetails = [];
             }
 
-            $service = $airport->services()->firstOrCreate([
+            $service = Service::create([
                 'name' => $request->get('name'),
+                'airport_id' => $airport->id,
                 'data' => $companyHouseDetails
             ]);
 
@@ -48,6 +52,7 @@ class ServiceController extends Controller
                 'service' => $service
             ], 200);
         } catch (Exception $e){
+            dd($e);
             return response()->json([
                 'status' => 'error'
             ], 500);
@@ -88,10 +93,10 @@ class ServiceController extends Controller
      * Update a new airport service.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return Response
+     * @return JsonResponse
      */
 
-    public function update(Request $request) : Response
+    public function update(Request $request, $serviceId) : JsonResponse
     {
         try {
             $airport = Airport::where('code', $request->get('airport_code'))->first();
@@ -99,23 +104,25 @@ class ServiceController extends Controller
                 throw new Exception('No airport with airport_code does not exists');
             }
 
-            $service = $airport->services()->firstOrCreate([
-                'name' => $request->get('name')
-            ]);
-
-            $openingHour = $service->openingHours()->where('day_of_week', 'Tuesday')->firstOrCreate([
-                'day_of_week' => 'Monday'
-            ]);
+            $service = Service::find($serviceId);
+            $service->airport_id = $airport->id;
+            $service->name = $request->get('name');
 
             if ($request->get('company_number')) {
                 $companyHouseDetails = $this->getCompanyHouseDetailsByCompanyNumber($request->get('company_number'));
+            } else {
+                $companyHouseDetails = [];
             }
+
+            $service->data = $companyHouseDetails;
+            $service->save();
 
             return response()->json([
                 'status' => 'success',
                 'service' => $service
             ], 200);
         } catch (Exception $e){
+            dd($e);
             return response()->json([
                 'status' => 'error'
             ], 500);
@@ -160,9 +167,9 @@ class ServiceController extends Controller
      * Search airport services.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return Response
+     * @return JsonResponse
      */
-    public function search(Request $request) : Response
+    public function search(Request $request) : JsonResponse
     {
         try {
             $from = $request->get('from');

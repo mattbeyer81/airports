@@ -20,3 +20,7 @@ src/app/pages/airports
 src/app/pages/services
 src/app/theme/services/airport.js
 src/app/theme/services/airportService.js
+
+Known Issues
+
+Airports with same name and code can be created.

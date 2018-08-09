@@ -18,7 +18,7 @@ Route::get('/airports', 'AirportController@getList');
 Route::put('/airports', 'AirportController@update');
 Route::delete('/airports/{airportId}', 'AirportController@delete');
 Route::post('/services', 'ServiceController@create');
-Route::put('/services', 'ServiceController@update');
+Route::put('/services/{serviceId}', 'ServiceController@update');
 Route::post('/services/{serviceId}/opening-hours', 'OpeningHourController@create');
 Route::get('/services/search', 'ServiceController@search');
 Route::get('/services', 'ServiceController@getServices');

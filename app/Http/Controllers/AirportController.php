@@ -7,6 +7,8 @@ use App\Airport;
 use Exception;
 use Log;
 
+use Illuminate\Http\JsonResponse;
+
 class AirportController extends Controller
 {
 
@@ -14,9 +16,9 @@ class AirportController extends Controller
      * Create a new airport.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return Airport
+     * @return JsonResponse
      */
-    public function create(Request $request) : Response
+    public function create(Request $request) : JsonResponse
     {
         try {
             Airport::create([
@@ -38,9 +40,9 @@ class AirportController extends Controller
      * Delete a new airport.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return Airport
+     * @return JsonResponse
      */
-    public function delete(Request $request, $airportId) : Response
+    public function delete(Request $request, $airportId) : JsonResponse
     {
         try {
             Airport::find($airportId)->delete();
@@ -59,10 +61,10 @@ class AirportController extends Controller
      * Get list of all airports.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return array
+     * @return JsonResponse
      */
 
-    public function getList(Request $request) : Response
+    public function getList(Request $request) : JsonResponse
     {
         try {
             $airports = Airport::get();
@@ -81,10 +83,10 @@ class AirportController extends Controller
      * Update airport.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return Response
+     * @return JsonResponse
      */
 
-    public function update(Request $request) : Response
+    public function update(Request $request) : JsonResponse
     {
         try {
             $data = $request->all();
