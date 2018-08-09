@@ -74,7 +74,7 @@ class ServiceController extends Controller
             $guzzle = new GuzzleClient;
             $response = $guzzle->request('GET', "https://api.companieshouse.gov.uk/company/{$companyNumber}", [
                 'auth' => [
-                    '2xLi0Ep2OKQDTecZlXium-RUONljnnBwzgSYfsEd',
+                    env('COMPANIES_HOUSE_KEY'),
                     ''
                 ]
             ]);
