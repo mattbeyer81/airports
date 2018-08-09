@@ -1,3 +1,13 @@
+These front and back end apps allow the user to add airports and related airport services.
+Opening hours can be added for each airport service.
+Airport services at a specific airport, opening during a specific time period can be searched for.
+
+As an extra feature...
+Airport services can be linked to the company provided, by providing a valid Companies House - Company number
+using:
+https://developer.companieshouse.gov.uk/api/docs/company/company_number/company_number.html
+
+
 Laravel Backend
 https://github.com/mattbeyer81/airports
 
