@@ -24,3 +24,5 @@ src/app/theme/services/airportService.js
 Known Issues
 
 Airports with same name and code can be created.
+Page does not scroll up to view create/edit forms
+Opening hours dates appear blank by default when creating/editing
